@@ -1,9 +1,6 @@
 
 (ns ringbuff.core
   (:gen-class)
-  (:require [clojure.core
-             :as core
-             :refer aset])
   (:import java.util.ArrayList)
   )
 
@@ -22,13 +19,13 @@
   (take!
     [this]
       (if (> start n)
-          (let [return-val (aget buf 0)]
+          (let [return-val (.get buf 0)]
             (set! start 0)
-            (aset buf start nil)
+            (.add buf start nil)
             (set! start (inc start))
             (set! capacity (inc capacity))
             return-val)
-          (let [return-val (aget buf start)]
+          (let [return-val (.get buf start)]
             (set! start (inc start))
             (set! capacity (inc capacity))
             (return-val)
@@ -44,19 +41,19 @@
         (if (> end n)
             (do
               (set! end 0)
-              (aset buf end e)
+              (.add buf end e)
               (set! end (inc end))
               (set! capacity (dec capacity)))
             (do
-              (aset buf end e)
+              (.add buf end e)
               (set! end (inc end))
               (set! capacity (dec capacity)))
               )
         (do
           (let [new-buf (java.util.ArrayList. (range (* 2 n)))]
             (doseq [i (+ start (range n))]
-              (aset new-buf (- i start) (aget buf (wrapper-index i))))
-            (aset new-buf n e)
+              (.add new-buf (- i start) (.get buf (wrapper-index i))))
+            (.add new-buf n e)
             (set! buf new-buf)
             )
           (set! start 0)
@@ -69,18 +66,38 @@
         )
       )
 
+
+
+
+;; (defn make-ringbuffer [size]
+;;   (let [ n size
+;;          start 0
+;;          end 0
+;;         ^ArrayList buf (java.util.ArrayList. (range n))
+;;          capacity n]
+;;     (ringbuffer. size n start end buf capacity))
+;;   )
+
+
 (defn make-ringbuffer [size]
   (let [^{:volatile-mutable true} n size
         ^{:volatile-mutable true} start 0
         ^{:volatile-mutable true} end 0
-        ^{:volatile-mutable true} ^ArrayList buf (java.util.ArrayList. (range n))
-        ^{:volatile-mutable true} capacity (count buf)]
-    (ringbuffer. size n start end buf capacity))
+        ^{:volatile-mutable true} buf (java.util.ArrayList. (range n))
+        ^{:volatile-mutable true} capacity n]
+    (ringbuffer. size n start end buf capacity)
+   ) 
   )
 
-(defn make-arrau [n]
-  (java.util.ArrayList. (range n))
+(defn king [n]
+  (let [ ^{:volatile-mutable true} capacity (atom n)
+        ^{:volatile-mutable true} alist (java.util.ArrayList. (range n))]
+    (.add alist 3 22222222)
+    (swap! capacity inc )
+    capacity
+    )
   )
+  
 
 (defn -main []
   (let [buf (make-ringbuffer 10)]

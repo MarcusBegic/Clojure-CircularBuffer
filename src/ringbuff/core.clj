@@ -79,7 +79,7 @@
   (let [^{:volatile-mutable true} n (volatile! size)
         ^{:volatile-mutable true} start (volatile! 0)
         ^{:volatile-mutable true} end (volatile! 0)
-        ^{:volatile-mutable true} buf (volatile! (java.util.ArrayList. (range n)))
+        ^{:volatile-mutable true} buf (volatile! (java.util.ArrayList. (range size)))
         ^{:volatile-mutable true} capacity (volatile! size)]
     (ringbuffer. size n start end buf capacity)
    )
